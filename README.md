@@ -18,7 +18,7 @@ Submit some task(s)
 
 The task(s) will be added to Redis, and will be consumed by the worker.
 
-If Redis is not running on `localhost:6379` set `REDIS_URL` to point to the Redis server
+If Redis is not running on `localhost:6379` set `REDIS_URL` to point to the Redis server (and optionally a database)
 
     export REDIS_URL=redis://redis.example.org:6379
 
@@ -34,3 +34,12 @@ A GUI is available for monitoring tasks
 
     pip install flower
     celery flower -A tasks
+
+Redis security
+--------------
+
+You can set a [password and other configuration options](http://docs.celeryproject.org/en/latest/getting-started/brokers/redis.html) when starting Redis.
+Note that all communication is in plain text so does not guard against network sniffing.
+
+    docker run -d --name redis -p 6379:6379 redis --requirepass PASSWORD
+    export REDIS_URL=redis://:PASSWORD@redis.example.org:6379

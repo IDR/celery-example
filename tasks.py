@@ -6,7 +6,8 @@ from random import uniform
 from subprocess import PIPE, Popen
 import sys
 
-NUMBER_OF_RETRIES = 5
+# Initial approximate delay in seconds
+RETRY_DELAY = 1
 APP_NAME = 'tasks'
 
 
@@ -33,7 +34,7 @@ def run(self, args):
     }
     if p.returncode:
         # Exponential backoff + jitter, default max_retries=3
-        delay = int(uniform(2, 4) ** self.request.retries)
+        delay = int(uniform(2, 4) ** self.request.retries * RETRY_DELAY)
         raise self.retry(countdown=delay, exc=Exception(r))
     return r
 
