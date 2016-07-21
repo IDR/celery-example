@@ -1,0 +1,55 @@
+# Self-contained Ansible playbook for setting up Celery
+# Assumes user can run docker and virtualenv
+
+- hosts: redis
+
+  vars:
+    redis_port: 6379
+
+  tasks:
+
+  - name: Run docker Redis
+    docker_container:
+      image: redis
+      name: celery-redis
+      published_ports: "{{ redis_port }}:6379"
+      state: started
+
+
+- hosts: workers
+
+  vars:
+    basedir: "~/celery"
+    virtualenv_download: "https://pypi.python.org/packages/5c/79/5dae7494b9f5ed061cff9a8ab8d6e1f02db352f3facf907d9eb614fb80e9/virtualenv-15.0.2.tar.gz#md5=0ed59863994daf1292827ffdbba80a63"
+    virtualenv_version: "15.0.2"
+    virtualenv_command: "{{ basedir }}/virtualenv-{{ virtualenv_version }}/virtualenv.py"
+
+  tasks:
+
+  - name: Create basedir
+    file:
+      path: "{{ basedir }}"
+      state: directory
+
+  - name: Download virtualenv
+    shell: 'curl "{{ virtualenv_download }}" | tar -zx'
+    args:
+      chdir: "{{ basedir }}"
+      creates: "{{ virtualenv_command }}"
+
+  - name: Create virtualenv
+    pip:
+      name: "{{ item }}"
+      state: present
+      virtualenv: "{{ basedir }}/venv"
+      virtualenv_command: "{{ virtualenv_command }}"
+      virtualenv_site_packages: no
+    with_items:
+      - celery
+      - redis
+
+  - name: Clone git repo
+    git:
+      dest: "{{ basedir }}/celery-example"
+      force: yes
+      repo: https://github.com/manics/celery-example.git
