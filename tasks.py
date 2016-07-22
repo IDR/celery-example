@@ -6,8 +6,7 @@ from random import uniform
 from subprocess import PIPE, Popen
 import sys
 
-# Initial approximate delay in seconds
-RETRY_DELAY = 1
+
 APP_NAME = 'tasks'
 
 try:
