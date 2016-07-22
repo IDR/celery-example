@@ -2,7 +2,7 @@ Celery Example
 ==============
 
 
-Start Redis (WARNING: this is insecure)
+Start Redis on localhost, e.g. using Docker (WARNING: this is insecure)
 
     docker run -d --name redis -p 6379:6379 redis
 
@@ -18,7 +18,18 @@ Submit some task(s)
 
 The task(s) will be added to Redis, and will be consumed by the worker.
 
-If Redis is not running on `localhost:6379` set `REDIS_URL` to point to the Redis server (and optionally a database)
+
+Configuration
+-------------
+
+If Redis is not running on `localhost:6379` create a configuration file `celeryconfig.py` in the same directory as `tasks.py` with
+
+    BROKER_URL = 'redis://redis.example.org:6379'
+    CELERY_RESULT_BACKEND = 'redis://redis.example.org:6379'
+
+This configuration file will be automatically loaded by `tasks.py`, see `celeryconfig.py.example` for more examples.
+
+If you do not have a configuration file you can set the environment variable `REDIS_URL`
 
     export REDIS_URL=redis://redis.example.org:6379
 
@@ -28,18 +39,20 @@ If you omit `-c` it will default to the number of CPUs.
 You can use `./example.sh` to test the support for automatic retries
 (note this will create an `celery-example-output` directory)
 
-    for f in $(seq 10); do ./tasks.py ./example.sh 1; done
+    for f in $(seq 100); do ./tasks.py ./example.sh 1; done
 
 A GUI is available for monitoring tasks
 
     pip install flower
     celery flower -A tasks
 
+
 Redis security
 --------------
 
-You can set a [password and other configuration options](http://docs.celeryproject.org/en/latest/getting-started/brokers/redis.html) when starting Redis.
+You can set a [password and other configuration options](http://docs.celeryproject.org/en/latest/getting-started/brokers/redis.html) when starting Redis, or in the Redis configuration file.
 Note that all communication is in plain text so does not guard against network sniffing.
 
     docker run -d --name redis -p 6379:6379 redis --requirepass PASSWORD
-    export REDIS_URL=redis://:PASSWORD@redis.example.org:6379
+
+    BROKER_URL = 'redis://:PASSWORD@redis.example.org:6379'

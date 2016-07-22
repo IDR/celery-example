@@ -31,8 +31,9 @@ def run(self, args):
         'rc': p.returncode
     }
     if p.returncode:
-        # Exponential backoff + jitter, default max_retries=3
-        delay = int(uniform(2, 4) ** self.request.retries * RETRY_DELAY)
+        # Exponential backoff + jitter
+        delay_base = app.conf.get('CUSTOM_RETRY_DELAY', 1)
+        delay = int(uniform(2, 4) ** self.request.retries * delay_base)
         raise self.retry(countdown=delay, exc=Exception(r))
     return r
 
