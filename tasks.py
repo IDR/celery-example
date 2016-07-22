@@ -10,15 +10,13 @@ import sys
 RETRY_DELAY = 1
 APP_NAME = 'tasks'
 
-
-redis_url = getenv('REDIS_URL', 'redis://')
-app = Celery(APP_NAME, broker=redis_url, backend=redis_url)
-# json serializer is more secure than the default pickle
-app.conf.update(
-    CELERY_TASK_SERIALIZER='json',
-    CELERY_ACCEPT_CONTENT=['json'],
-    CELERY_RESULT_SERIALIZER='json',
-)
+try:
+    app = Celery(APP_NAME)
+    app.config_from_object('celeryconfig', force=True)
+except ImportError:
+    redis_url = getenv('REDIS_URL', 'redis://')
+    print 'celeryconfig not found, using %s' % redis_url
+    app = Celery(APP_NAME, broker=redis_url, backend=redis_url)
 
 
 # http://docs.celeryproject.org/en/latest/userguide/tasks.html
@@ -41,6 +39,7 @@ def run(self, args):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
+        print app.conf.humanize(with_defaults=False, censored=True)
         sys.stderr.write('ERROR: No command given\n')
         sys.exit(2)
     r = run.delay(args=sys.argv[1:])
