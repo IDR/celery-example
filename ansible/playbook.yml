@@ -1,25 +1,11 @@
 # Self-contained Ansible playbook for setting up Celery
-# Assumes user can run docker and virtualenv
-
-- hosts: redis
-
-  vars:
-    redis_port: 6379
-
-  tasks:
-
-  - name: Run docker Redis
-    docker_container:
-      image: redis
-      name: celery-redis
-      published_ports: "{{ redis_port }}:6379"
-      state: started
-
 
 - hosts: workers
 
   vars:
+    redis_url: "redis://localhost:6379/0"
     basedir: "~/celery"
+
     virtualenv_download: "https://pypi.python.org/packages/5c/79/5dae7494b9f5ed061cff9a8ab8d6e1f02db352f3facf907d9eb614fb80e9/virtualenv-15.0.2.tar.gz#md5=0ed59863994daf1292827ffdbba80a63"
     virtualenv_version: "15.0.2"
     virtualenv_command: "{{ basedir }}/virtualenv-{{ virtualenv_version }}/virtualenv.py"
@@ -53,3 +39,9 @@
       dest: "{{ basedir }}/celery-example"
       force: yes
       repo: https://github.com/manics/celery-example.git
+
+  - name: Celery configuration file
+    template:
+      backup: no
+      dest: "{{ basedir }}/celery-example/celeryconfig.py"
+      src: celeryconfig-py.j2

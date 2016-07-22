@@ -1,0 +1,18 @@
+# Celery configuration
+# http://docs.celeryproject.org/en/latest/configuration.html
+
+BROKER_URL = '{{ redis_url }}'
+CELERY_RESULT_BACKEND = BROKER_URL
+
+# json serializer is more secure than the default pickle
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_SERIALIZER = 'json'
+
+# Use UTC instead of localtime
+CELERY_ENABLE_UTC = True
+
+# Maximum retries per task
+CELERY_TASK_ANNOTATIONS = {'*': {'max_retries': 10}}
+
+CUSTOM_RETRY_DELAY = 1
