@@ -56,3 +56,18 @@ Note that all communication is in plain text so does not guard against network s
     docker run -d --name redis -p 6379:6379 redis --requirepass PASSWORD
 
     BROKER_URL = 'redis://:PASSWORD@redis.example.org:6379'
+
+Redis can [write its data to disk](http://redis.io/topics/persistence) and reload it on startup
+
+    docker run -d --name redis -p 6379:6379 -v redis-volume:/data redis --requirepass PASSWORD --appendonly yes
+
+
+Long-running tasks
+------------------
+
+The default Celery configuration is designed for handling short tasks.
+There are several changes that can be made to improve the processing of long-running tasks, see the [configuration](http://docs.celeryproject.org/en/latest/configuration.html) and [optimising](http://docs.celeryproject.org/en/latest/userguide/optimizing.html) docs.
+
+For example see `ansible/templates/celeryconfig-py.j2`, start workers with the `-Ofair` option
+
+    celery -A tasks worker --loglevel=info -Ofair

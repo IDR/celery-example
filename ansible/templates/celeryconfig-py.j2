@@ -13,6 +13,16 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ENABLE_UTC = True
 
 # Maximum retries per task
-CELERY_TASK_ANNOTATIONS = {'*': {'max_retries': 10}}
+CELERY_TASK_ANNOTATIONS = { '*': {'max_retries': {{ max_retries }} } }
 
-CUSTOM_RETRY_DELAY = 1
+# Store results for this time
+CELERY_TASK_RESULT_EXPIRES = {{ store_tasks_hours }} * 3600
+
+# Update the Redis status when a task is started
+CELERY_TRACK_STARTED = True
+
+# Minimise prefetch
+CELERYD_PREFETCH_MULTIPLIER = 1
+
+# Custom (non-celery) options
+CUSTOM_RETRY_DELAY = {{ retry_delay }}
