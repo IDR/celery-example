@@ -24,5 +24,8 @@ CELERY_TRACK_STARTED = True
 # Minimise prefetch
 CELERYD_PREFETCH_MULTIPLIER = 1
 
+# Log task stdout/stderr at INFO instead of WARNING
+CELERY_REDIRECT_STDOUTS_LEVEL = 'INFO'
+
 # Custom (non-celery) options
 CUSTOM_RETRY_DELAY = {{ retry_delay }}
