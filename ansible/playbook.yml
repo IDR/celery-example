@@ -7,7 +7,7 @@
     max_retries: 10
     retry_delay: 30
     store_tasks_hours: 384
-    basedir: "~/celery"
+    basedir: "{{ ansible_env.HOME}}/celery"
 
     virtualenv_download: "https://pypi.python.org/packages/5c/79/5dae7494b9f5ed061cff9a8ab8d6e1f02db352f3facf907d9eb614fb80e9/virtualenv-15.0.2.tar.gz#md5=0ed59863994daf1292827ffdbba80a63"
     virtualenv_version: "15.0.2"
@@ -48,3 +48,10 @@
       backup: no
       dest: "{{ basedir }}/celery-example/celeryconfig.py"
       src: celeryconfig-py.j2
+
+  - name: Celery worker helper script
+    template:
+      backup: no
+      dest: "{{ basedir }}/celery-example/run-worker.sh"
+      src: run-worker-sh.j2
+      mode: 0755

@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+cd "{{ basedir }}/celery-example"
+. "{{ basedir }}/venv/bin/activate"
+exec celery -A tasks worker --loglevel=info -Ofair "$@"

@@ -2,7 +2,7 @@ Celery Example
 ==============
 
 
-Start Redis on localhost, e.g. using Docker (WARNING: this is insecure)
+Start Redis on localhost, e.g. using Docker (this is insecure, see "Redis security" below for a better option):
 
     docker run -d --name redis -p 6379:6379 redis
 
@@ -50,16 +50,14 @@ A GUI is available for monitoring tasks
 Redis security
 --------------
 
-You can set a [password and other configuration options](http://docs.celeryproject.org/en/latest/getting-started/brokers/redis.html) when starting Redis, or in the Redis configuration file.
-Note that all communication is in plain text so does not guard against network sniffing.
+You can set a [password and other configuration options](http://docs.celeryproject.org/en/latest/getting-started/brokers/redis.html) when starting Redis (`--requirepass`), or in the Redis configuration file.
+All communication is in plain text so this does not guard against network sniffing.
+Redis can [write its data to disk](http://redis.io/topics/persistence) and reload it on startup (`--appendonly yes`) instead of running as an in-memory database.
 
-    docker run -d --name redis -p 6379:6379 redis --requirepass PASSWORD
+    docker run -d --name redis -p 6379:6379 -v redis-volume:/data redis \
+        --requirepass PASSWORD --appendonly yes
 
     BROKER_URL = 'redis://:PASSWORD@redis.example.org:6379'
-
-Redis can [write its data to disk](http://redis.io/topics/persistence) and reload it on startup
-
-    docker run -d --name redis -p 6379:6379 -v redis-volume:/data redis --requirepass PASSWORD --appendonly yes
 
 
 Long-running tasks
