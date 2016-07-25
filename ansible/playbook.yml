@@ -5,8 +5,8 @@
   vars:
     redis_url: "redis://localhost:6379/0"
     max_retries: 10
-    retry_delay: 1
-    store_tasks_hours: 240
+    retry_delay: 30
+    store_tasks_hours: 384
     basedir: "~/celery"
 
     virtualenv_download: "https://pypi.python.org/packages/5c/79/5dae7494b9f5ed061cff9a8ab8d6e1f02db352f3facf907d9eb614fb80e9/virtualenv-15.0.2.tar.gz#md5=0ed59863994daf1292827ffdbba80a63"
