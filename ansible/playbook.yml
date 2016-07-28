@@ -4,8 +4,8 @@
 
   vars:
     redis_url: "redis://localhost:6379/0"
-    max_retries: 10
-    retry_delay: 30
+    max_retries: 3
+    retry_delay: 120
     store_tasks_hours: 384
     basedir: "{{ ansible_env.HOME}}/celery"
 
