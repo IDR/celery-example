@@ -3,7 +3,7 @@
 from celery import Celery
 from os import getenv
 from random import uniform
-from subprocess import PIPE, Popen
+import subprocess
 import sys
 
 
@@ -21,15 +21,11 @@ except ImportError:
 # http://docs.celeryproject.org/en/latest/userguide/tasks.html
 @app.task(bind=True)
 def run(self, args):
-    p = Popen(args, stdout=PIPE, stderr=PIPE)
-    out, err = p.communicate()
-    r = {
-        'id': self.request.id,
-        'output': out,
-        'error': err,
-        'rc': p.returncode
-    }
-    if p.returncode:
+    out_fn, err_fn = args.pop(0), args.pop(0)
+    with open(out_fn, "w") as fo, open(err_fn, "w") as fe:
+        ret = subprocess.call(args, stdout=fo, stderr=fe)
+    r = {'id': self.request.id, 'rc': ret}
+    if ret:
         # Exponential backoff + jitter
         delay_base = app.conf.get('CUSTOM_RETRY_DELAY', 1)
         delay = int(uniform(2, 4) ** self.request.retries * delay_base)
@@ -37,10 +33,14 @@ def run(self, args):
     return r
 
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
+def main(argv):
+    if len(argv) < 4:
         print app.conf.humanize(with_defaults=False, censored=True)
-        sys.stderr.write('ERROR: No command given\n')
+        sys.stderr.write('USAGE: python %s OUT ERR CMD\n' % argv[0])
         sys.exit(2)
-    r = run.delay(args=sys.argv[1:])
+    r = run.delay(args=argv[1:])
     print r
+
+
+if __name__ == "__main__":
+    main(sys.argv)
