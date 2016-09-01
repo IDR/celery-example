@@ -1,29 +1,44 @@
 #!/usr/bin/env python
 
-from celery import Celery
-from os import getenv
-from random import uniform
-import subprocess
 import sys
+import os
+import errno
+import subprocess
+from random import uniform
 
+from celery import Celery
+from celery.utils.log import get_task_logger
 
+LOGGER = get_task_logger(__name__)
 APP_NAME = 'tasks'
 
 try:
     app = Celery(APP_NAME)
     app.config_from_object('celeryconfig', force=True)
 except ImportError:
-    redis_url = getenv('REDIS_URL', 'redis://')
+    redis_url = os.getenv('REDIS_URL', 'redis://')
     print 'celeryconfig not found, using %s' % redis_url
     app = Celery(APP_NAME, broker=redis_url, backend=redis_url)
+
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            pass
 
 
 # http://docs.celeryproject.org/en/latest/userguide/tasks.html
 @app.task(bind=True)
 def run(self, args):
     out_fn, err_fn = args.pop(0), args.pop(0)
+    for fn in out_fn, err_fn:
+        mkdir_p(os.path.dirname(os.path.abspath(fn)))
     with open(out_fn, "w") as fo, open(err_fn, "w") as fe:
         ret = subprocess.call(args, stdout=fo, stderr=fe)
+    LOGGER.info("stdout: %s" % out_fn)
+    LOGGER.info("stderr: %s" % err_fn)
     r = {'id': self.request.id, 'rc': ret}
     if ret:
         # Exponential backoff + jitter
