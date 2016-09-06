@@ -53,9 +53,9 @@ def main(argv):
         print app.conf.humanize(with_defaults=False, censored=True)
         sys.stderr.write('USAGE: python %s OUT ERR CMD\n' % argv[0])
         sys.exit(2)
-    r = run.delay(args=argv[1:])
-    print r
+    return run.delay(args=argv[1:])
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    r = main(sys.argv)
+    print r
